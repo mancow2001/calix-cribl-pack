@@ -1,0 +1,48 @@
+id: default
+groups: {}
+comments: []
+routes:
+  - id: calix_category
+    name: Calix Category Events (LOCAL0-LOCAL5)
+    final: true
+    disabled: false
+    pipeline: calix_category_enrich
+    description: Routes category-specific facility events (LOCAL0-LOCAL5, facility codes 16-21)
+    clones: []
+    enableOutputExpression: false
+    outputExpression: null
+    filter: (facilityName && /^local[0-5]$/i.test(facilityName)) || /\]\s*\[1[6-9]\]/.test(_raw) || /\]\s*\[2[01]\]/.test(_raw)
+    output: default
+  - id: calix_command_log
+    name: Calix Command Logs (LOCAL6)
+    final: true
+    disabled: false
+    pipeline: calix_command_log
+    description: Routes LOCAL6 command log events (facility code 22) to the command log pipeline
+    clones: []
+    enableOutputExpression: false
+    outputExpression: null
+    filter: facilityName=='local6' || /\]\s*\[22\]/.test(_raw)
+    output: default
+  - id: calix_alarm
+    name: Calix Alarms/Events (LOCAL7)
+    final: true
+    disabled: false
+    pipeline: calix_alarm
+    description: Routes LOCAL7 alarm/event notifications (facility code 23) to the alarm pipeline
+    clones: []
+    enableOutputExpression: false
+    outputExpression: null
+    filter: facilityName=='local7' || /\]\s*\[23\]/.test(_raw)
+    output: default
+  - id: calix_default
+    name: Calix Default
+    final: true
+    disabled: false
+    pipeline: calix_axos_main
+    description: Default route for all other Calix AXOS syslog events
+    clones: []
+    enableOutputExpression: false
+    outputExpression: null
+    filter: "true"
+    output: default

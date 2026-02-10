@@ -1,0 +1,13 @@
+{
+  "name": "calix-axos",
+  "version": "1.0.0",
+  "displayName": "Calix AXOS Syslog",
+  "description": "Comprehensive Cribl pack for Calix AXOS syslog events. Parses and enriches all AXOS syslog facilities including command logs (LOCAL6), alarm/event notifications (LOCAL7), and all category-specific facilities (SECURITY, ARC, CONFIGURATION, DBCHANGE, GENERAL, ERPS, TCA, OAM, PON, PORT, DHCP, RSTP, LAG, G8032, NTP, LACP, ENVIRONMENTAL, NTWCLK). Includes security event detection, MITRE ATT&CK mapping, and configuration change tracking.",
+  "author": "Nathan Bray",
+  "tags": {
+    "streamtags": ["calix", "axos", "syslog", "security", "mitre"],
+    "dataType": ["logs"],
+    "useCase": ["normalization", "enrichment", "security"]
+  },
+  "minVersion": "4.0.0"
+}

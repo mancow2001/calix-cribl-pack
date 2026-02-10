@@ -1,0 +1,83 @@
+output: default
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        Calix AXOS Main Pipeline - Initial parsing of AXOS syslog messages.
+        Extracts bracket fields [shelf][slot][A|S][pid] [facility], message code,
+        and appname. Enriches with facility lookup and sets sourcetype/index.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /(?<message_code>\w+\.\w+\.\d+):\s+(?<message_type>AT-CONFIG|AT-OPERATION|[\w-]+)/
+
+  - id: regex_extract
+    filter: "!appname"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /(?<appname>\w+)\[?\d*\]?:\s+\[/
+
+  - id: lookup
+    filter: "true"
+    disabled: false
+    conf:
+      file: calix_facility_map.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: facility_code
+          lookupField: priority
+      outFields:
+        - lookupField: axos_category
+          eventField: axos_category
+        - lookupField: facility_name
+          eventField: facility_name
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: sourcetype
+          value: "'calix:axos:syslog'"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: index
+          value: "axos_category === 'SECURITY' ? 'security' : 'network'"
+description: >-
+  Calix AXOS main entry pipeline. Parses AXOS bracket fields (shelf, slot,
+  controller state, process ID, facility code), extracts message code and type,
+  resolves appname, enriches with facility category lookup, and sets
+  sourcetype and index.

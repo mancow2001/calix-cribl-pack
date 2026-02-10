@@ -1,0 +1,9 @@
+facility_name,facility_code,priority,axos_category,description
+LOCAL0,128,16,SECURITY,Security events
+LOCAL1,136,17,ARC,Availability Redundancy Checkpointing alarms
+LOCAL2,144,18,CONFIGURATION,Running Configuration category
+LOCAL3,152,19,DBCHANGE,Database change category
+LOCAL4,160,20,GENERAL,General alarms
+LOCAL5,168,21,ERPS,ERPS category
+LOCAL6,176,22,COMMAND_LOG,User command logs (issued commands logging)
+LOCAL7,184,23,ALARM_EVENT,Alarm and event notifications (default log-facility)

@@ -1,0 +1,67 @@
+event_name,primary_element,secondary_element,security_relevant,maskable
+application-out-of-sync,name of the impacted software module (e.g. arcmgrd),,true,false
+application-restart,name of the impacted software module (e.g. arcmgrd),heartbeat-timeout/unresponsive/not-running,true,false
+application-suspended,name of the impacted software module (e.g. arcmgrd),,true,false
+apply-dynamic-policy-success,subscriber-context-id,policy-map,false,true
+bng-v4-cpe-replacement,subscriber-context-id,,false,false
+bng-v6-cpe-replacement,subscriber-context-id,,false,false
+card-restart,reset reason,,false,false
+coa-req-from-invalid-client,invalid client ip,policy-change-req or disconnect-req,true,true
+copy-to-running-config,copy from location,copy to running config request-id,true,false
+copy-to-running-config-aborted,copy to running config request-id,,false,false
+copy-to-running-config-complete,copy to running config request-id,,true,false
+dhcp-lease-establishment,ffp-name,,false,true
+dhcp-lease-termination,ffp-name,,false,true
+file-deleted,file name,folder,true,false
+incompatible-ext-dhcp-ivp6,ipv6-offered-ipv6-address,,false,false
+inter-vrf-duplicate-route,ecmp_ip_add,,false,false
+invalid-ont-cleared,serial number,invalid ont vendor-id,true,false
+invalid-ont-detected,serial number,invalid ont vendor-id,true,false
+ipfix-reset,ipfix-reset type,,false,false
+l2vpn-trap-pw-down,pw-id,neighbor-ip,false,false
+l2vpn-trap-pw-up,pw-id,neighbor-ip,false,false
+lldp-neighbor-activity,neighbor-chassis-id,neighbor-port-id,false,false
+mac-spoof,,,true,true
+mpls-ldp-adj-down,mpls_peer_ldp_id,,false,false
+mpls-ldp-adj-up,mpls_peer_ldp_id,,false,false
+omci-comm-fail,vendor-id - serial-number,ont-id (if linked),false,false
+ont-arrival,ont-id (if linked) or vendor-id (if unlinked),,false,false
+ont-departure,ont-id (if linked) or vendor-id (if unlinked),,false,false
+ont-download-end,serial-number,vendor-id,false,false
+ont-download-fail,serial-number,vendor-id,false,false
+ont-download-start,serial-number,vendor-id,false,false
+ont-protection-switch-failed,manual/auto,,false,false
+ont-registration-num,vendor-id - serial-number,ont-id (if linked),false,false
+ont-serial-number,vendor-id - serial-number,ont-id (if linked),false,false
+ont-snapshot-retrieved,shelf/slot,,false,false
+ont-speed-test-complete,ont/port,vlan/c-vlan,false,false
+ont-twdmch-rmon-pmdata-cleared,ont-name,twdm-channel-id,false,false
+ont-twdmch-rmon-session-tca,ont-name,twdm-channel-id,false,false
+ont-upgrade-in-progress-report,serial-number,vendor-id,false,false
+overlap-ext-dhcp-config,Router Option(3) value,,false,false
+pilot-onu-complete,serial-number,ont-id (if linked),false,false
+pilot-onu-failed,serial-number,ont-id (if linked),false,false
+pilot-onu-start,serial-number,ont-id (if linked),false,false
+pon-mac-snapshot-available,PON MAC number,status code,false,false
+pon-mac-snapshot-unavailable,PON MAC number,status code,false,false
+pon-optic-arrival,transport-type detected,,false,false
+pon-optic-departed,transport-type detected,,false,false
+pppoe-ia-mac-spoof,,,true,true
+pppoe-session-establishment,ffp-name,,false,true
+pppoe-session-termination,ffp-name,,false,true
+remote-config-not-applied,xpath of remote config failure,,false,false
+remove-dynamic-policy-success,subscriber-context-id,policy-map,false,true
+resource-request,vendor-id - serial-number,ont-id (if linked),false,false
+route-add-os-failed,route-prefix,,false,false
+route-delete-os-failed,route-prefix,,false,false
+sr-srgb-allocation-failed,lower-bound,upper-bound,false,false
+startup-config-invalid,config file used for startup,,true,false
+techlog-autoupload-started,techlog file name,,false,false
+techlog-autoupload-completed,techlog file name,,false,false
+techlog-autoupload-file-deleted,techlog file name,,false,false
+techlog-autoupload-failed,techlog file name,,false,false
+tuning-response,vendor-id - serial-number,ont-id (if linked),false,false
+user-login,,,true,false
+user-logout,,,true,false
+vrrp-master,ip-address/ipv6-address,,false,false
+vrrp-slave,ip-address/ipv6-address,,false,false

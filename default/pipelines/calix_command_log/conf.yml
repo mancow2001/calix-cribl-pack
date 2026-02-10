@@ -1,0 +1,147 @@
+output: default
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        Calix AXOS Command Log Pipeline - Parses LOCAL6 command log events.
+        Handles both AT-CONFIG and AT-OPERATION message formats. Extracts
+        session details (user, manager, IP, session ID), config change details
+        (xpath, old/new values), and flags security-relevant events.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /(?<message_code>\w+\.\w+\.\d+):\s+(?<message_type>AT-CONFIG|AT-OPERATION|[\w-]+)/
+
+  - id: regex_extract
+    filter: "!appname"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /(?<appname>\w+)\[?\d*\]?:\s+\[/
+
+  - id: lookup
+    filter: "true"
+    disabled: false
+    conf:
+      file: calix_facility_map.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: facility_code
+          lookupField: priority
+      outFields:
+        - lookupField: axos_category
+          eventField: axos_category
+        - lookupField: facility_name
+          eventField: facility_name
+
+  - id: regex_extract
+    filter: "_raw.includes('AT-CONFIG')"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /AT-CONFIG:\s+(?<config_status>COMPLD|DENY):\s+(?<config_verb>\w+):(?<config_xpath>[^(]+?):\(?(?:cli-?xpath=(?<cli_xpath>[^)]+)\))?:?(?<new_value>[^:()]*)(?::\(old-?value=(?<old_value>[^)]*)\))?:(?<session_user>\w+):(?<session_manager>\w+):(?<session_ip>[^:]+):(?<session_id>\d+)/
+
+  - id: regex_extract
+    filter: "_raw.includes('AT-OPERATION')"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /AT-OPERATION:\s+(?<operation_status>COMPLD|DENY):\s+(?<operation_xpath>.+?):(?<session_user>\w+):(?<session_manager>\w+):(?<session_ip>[^:]+):(?<session_id>\d+)/
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: action_type
+          value: "config_status ? 'AT-CONFIG' : 'AT-OPERATION'"
+        - disabled: false
+          name: status
+          value: "config_status || operation_status"
+        - disabled: false
+          name: security_event_key
+          value: "config_status ? 'AT-CONFIG ' + config_status : action_type"
+        - disabled: false
+          name: user
+          value: "session_user"
+        - disabled: false
+          name: src_ip
+          value: "session_ip"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: sourcetype
+          value: "'calix:axos:command'"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: security_alert
+          value: "(status === 'DENY') || (action_type === 'AT-CONFIG')"
+
+  - id: lookup
+    filter: "true"
+    disabled: false
+    conf:
+      file: calix_security_events.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: security_event_key
+          lookupField: event_name
+      outFields:
+        - lookupField: mitre_tactic
+          eventField: mitre_tactic
+        - lookupField: mitre_technique_id
+          eventField: mitre_technique_id
+        - lookupField: mitre_technique_name
+          eventField: mitre_technique_name
+        - lookupField: description
+          eventField: event_description
+description: >-
+  Calix AXOS command log pipeline for LOCAL6 events. Parses AT-CONFIG and
+  AT-OPERATION messages extracting session user, manager, IP, session ID,
+  config xpath, old/new values. Flags DENY and config changes as security
+  alerts. Enriches with MITRE ATT&CK mappings from security events lookup.

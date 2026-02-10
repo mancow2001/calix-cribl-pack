@@ -1,0 +1,3 @@
+rows: 8
+size: 491
+description: Maps AXOS facility codes (16-23) to facility names and categories (SECURITY, ARC, CONFIGURATION, DBCHANGE, GENERAL, ERPS, COMMAND_LOG, ALARM_EVENT)

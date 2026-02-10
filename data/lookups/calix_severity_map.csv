@@ -1,0 +1,7 @@
+syslog_severity,syslog_severity_name,axos_severity,axos_severity_name
+2,crit,CRITICAL,CRITICAL
+3,err,MAJOR,MAJOR
+3,err,MINOR,MINOR
+4,warning,WARNING,WARNING
+6,info,INFO,INFO
+6,info,CLEAR,CLEAR

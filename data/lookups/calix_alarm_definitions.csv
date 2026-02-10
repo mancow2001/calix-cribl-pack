@@ -1,0 +1,52 @@
+alarm_name,primary_element,secondary_element,security_relevant
+application-caused-reboot,Name of the impacted software module (e.g. arcmgrd),,true
+battery-A-voltage-tca,serial number of card,,false
+battery-B-voltage-tca,serial number of card,,false
+brick-1-temperature-tca,sensor name,,false
+card-degraded,card model,card serial number,true
+card-departed,card model,card serial number,true
+cpu-tca,usage,,false
+cpu-temperature-tca,sensor name,,false
+current-tca,power-supply name,,false
+disk-space-tca,disk name,,false
+duplex-system-failure,active controller shelf/slot,,false
+duplicate-v4-relay-config,ipv4 existing relay profile name,,false
+duplicate-v6-relay-config,ipv6 existing relay profile name,,false
+fan-missing-alarm,fan name,,false
+fan-speed-tca,fan name,,false
+g8032-configuration-simplex,ring port or ring lag,,false
+g8032-fop-pm,ring port or ring lag,,false
+g8032-fop-to,ring port or ring lag,,false
+g8032-isolated-node,ring port or ring lag,,false
+g8032-local-forced-switch,ring port or ring lag,,false
+g8032-local-manual-switch,ring port or ring lag,,false
+g8032-local-signal-fail,ring port or ring lag,,false
+g8032-remote-forced-switch,ring port or ring lag,,false
+g8032-remote-manual-switch,ring port or ring lag,,false
+g8032-remote-signal-fail,ring port or ring lag,,false
+hardware-failure,failed component,,true
+icl-card-upgrade-in-progress,icl lag,,false
+invalid-ont-detected,ont serial-number,ont-vendor-id (in hex format),true
+ipfix-collector-unreachable,IP address or DNS name,Exporter Type,false
+mac-upgrade-alarm,failure string,,true
+memory-tca,ram,,false
+module-optical-power-fault,module DDM alarm name,,false
+mpls-ldp-sess-down,router-id,,false
+multi-primary,mac address,,true
+multi-secondary,mac address,,true
+ospf-neighbor-session-down,ospf/ospfv3,,false
+out-of-profile,ont-port/vlan/service/class-id,,false
+pon-rogue-detected,serial-number (if serial-number isolated),vendor-id,true
+power-tca,power-supply name,,false
+router-ipv6-address-mismatch,ipv6 router-address,,false
+software-fault,name of the impacted software module (e.g. equipmentmgrd),,true
+switch-temperature-tca,switch number,,false
+switch-usage-tca,affected switch resource,,false
+switch-usage-limit,affected switch resource,,false
+temperature-tca,sensor name,,false
+ts-cam-temperature-tca,sensor name,,false
+ts-esw-temperature-tca,sensor name,,false
+ts-pm1-temperature-tca,sensor name,,false
+ts-pm2-temperature-tca,sensor name,,false
+voltage-tca,power-supply name,,false
+vrrp-fatal,ip-address/ipv6-address,,false

@@ -1,0 +1,157 @@
+output: default
+groups: {}
+asyncFuncTimeout: 1000
+functions:
+  - id: comment
+    filter: "true"
+    disabled: false
+    conf:
+      comment: >-
+        Calix AXOS Alarm Pipeline - Parses LOCAL7 alarm/event notification
+        syslog messages. Extracts all alarm fields (Id, Severity, Name,
+        Category, Cause, Details, Xpath, etc.). Enriches with severity mapping,
+        alarm definitions, and MITRE ATT&CK security event lookups.
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+
+  - id: regex_extract
+    filter: "!appname"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /(?<appname>\w+)\[?\d*\]?:\s+\[/
+
+  - id: lookup
+    filter: "true"
+    disabled: false
+    conf:
+      file: calix_facility_map.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: facility_code
+          lookupField: priority
+      outFields:
+        - lookupField: axos_category
+          eventField: axos_category
+        - lookupField: facility_name
+          eventField: facility_name
+
+  - id: regex_extract
+    filter: "true"
+    disabled: false
+    conf:
+      source: _raw
+      iterations: 1
+      overwrite: false
+      type: regex
+      regex: /Id:(?<alarm_id>\d+),\s*Syslog-Severity:(?<syslog_severity>\d+),\s*Perceived-Severity:(?<perceived_severity>\w+),\s*Name:(?<alarm_name>[\w-]+),\s*Category:(?<alarm_category>\w+)\s*Cause:(?<alarm_cause>.+?),\s*Details:(?<alarm_details>.+?),\s*Xpath:(?<alarm_xpath>.+?)\s*Address:(?<alarm_address>.+?),\s*Primary-element:(?<primary_element>.+?),\s*Value:(?<alarm_value>.+?),\s*Verb:(?<alarm_verb>.+?),\s*Session:(?<alarm_session>.+?),\s*Login:(?<alarm_login>.+?),\s*IpAddress:(?<alarm_ip>.+?),\s*SrcManager:(?<alarm_src_manager>.+?),\s*Secondary-element:(?<secondary_element>.*)/
+
+  - id: lookup
+    filter: "perceived_severity"
+    disabled: false
+    conf:
+      file: calix_severity_map.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: perceived_severity
+          lookupField: axos_severity_name
+      outFields:
+        - lookupField: syslog_severity_name
+          eventField: syslog_severity_name
+        - lookupField: axos_severity
+          eventField: axos_severity
+
+  - id: lookup
+    filter: "alarm_name"
+    disabled: false
+    conf:
+      file: calix_alarm_definitions.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: alarm_name
+          lookupField: alarm_name
+      outFields:
+        - lookupField: security_relevant
+          eventField: security_relevant
+
+  - id: lookup
+    filter: "alarm_name"
+    disabled: false
+    conf:
+      file: calix_event_definitions.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: alarm_name
+          lookupField: event_name
+      outFields:
+        - lookupField: maskable
+          eventField: maskable
+
+  - id: lookup
+    filter: "alarm_name"
+    disabled: false
+    conf:
+      file: calix_security_events.csv
+      matchMode: exact
+      matchType: first
+      reloadPeriodSec: 60
+      addToEvent: false
+      inFields:
+        - eventField: alarm_name
+          lookupField: event_name
+      outFields:
+        - lookupField: mitre_tactic
+          eventField: mitre_tactic
+        - lookupField: mitre_technique_id
+          eventField: mitre_technique_id
+        - lookupField: mitre_technique_name
+          eventField: mitre_technique_name
+        - lookupField: description
+          eventField: event_description
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: sourcetype
+          value: "'calix:axos:alarm'"
+
+  - id: eval
+    filter: "true"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: security_alert
+          value: "security_relevant === 'true' || alarm_category === 'SECURITY'"
+description: >-
+  Calix AXOS alarm pipeline for LOCAL7 events. Parses alarm notification
+  fields including Id, Severity, Name, Category, Cause, Details, Xpath,
+  Address, and session info. Enriches with severity mapping, alarm
+  definitions (security_relevant flag), event definitions (maskable flag),
+  and MITRE ATT&CK mappings.

@@ -1,0 +1,18 @@
+event_name,event_type,category,mitre_tactic,mitre_technique_id,mitre_technique_name,description
+user-login,event,SECURITY,Initial Access,T1078,Valid Accounts,User login from CLI/Netconf/EWI
+user-logout,event,SECURITY,-,-,-,User logout
+AT-CONFIG DENY,command,SECURITY,Defense Evasion,T1562,Impair Defenses,Configuration command denied
+AT-CONFIG COMPLD,command,CONFIGURATION,Persistence,T1098,Account Manipulation,Configuration change completed
+mac-spoof,event,SECURITY,Initial Access,T1200,Hardware Additions,MAC address spoofing detected
+pppoe-ia-mac-spoof,event,SECURITY,Initial Access,T1200,Hardware Additions,PPPoE IA MAC spoofing detected
+pon-rogue-detected,alarm,SECURITY,Initial Access,T1200,Hardware Additions,Rogue ONT detected on PON port
+invalid-ont-detected,event,SECURITY,Initial Access,T1200,Hardware Additions,Invalid/unauthorized ONT detected
+coa-req-from-invalid-client,event,SECURITY,Credential Access,T1557,Adversary-in-the-Middle,CoA request from unauthorized RADIUS client
+software-fault,alarm,GENERAL,Impact,T1499,Endpoint Denial of Service,Software module fault
+application-caused-reboot,alarm,GENERAL,Impact,T1529,System Shutdown/Reboot,Application triggered system reboot
+copy-to-running-config,event,CONFIGURATION,Persistence,T1546,Event Triggered Execution,Config file loaded to running config
+card-departed,alarm,GENERAL,Impact,T1200,Hardware Additions,Line card removed from chassis
+multi-primary,alarm,GENERAL,Lateral Movement,T1557,Adversary-in-the-Middle,Duplicate MAC detected - possible MitM
+multi-secondary,alarm,GENERAL,Lateral Movement,T1557,Adversary-in-the-Middle,Duplicate secondary MAC detected
+file-deleted,event,GENERAL,Defense Evasion,T1070,Indicator Removal,File deleted from system
+startup-config-invalid,event,CONFIGURATION,Impact,T1565,Data Manipulation,Startup config corrupted or invalid
