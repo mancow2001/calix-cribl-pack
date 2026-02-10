@@ -27,15 +27,16 @@ jobs:
 
       - name: Build .crbl package
         run: |
-          tar -czf calix-axos-${{ steps.version.outputs.VERSION }}.crbl \
+          CRBL_FILE="calix-axos-${{ steps.version.outputs.VERSION }}.crbl"
+          tar -czf "/tmp/${CRBL_FILE}" \
             --exclude='.DS_Store' \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='reference' \
-            --exclude='*.crbl' \
             .
+          mv "/tmp/${CRBL_FILE}" .
           echo "Built package:"
-          ls -lh calix-axos-${{ steps.version.outputs.VERSION }}.crbl
+          ls -lh "${CRBL_FILE}"
 
       - name: Create GitHub Release
         env:
