@@ -76,6 +76,13 @@ functions:
           value: "axos_category === 'SECURITY' ? 'security' : 'network'"
 
   - id: eval
+    filter: "C.vars['remove_intermediate_fields'] !== false"
+    disabled: false
+    conf:
+      remove:
+        - message
+
+  - id: eval
     filter: "C.vars['raw_handling'] === 'truncate'"
     disabled: false
     conf:

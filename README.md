@@ -77,7 +77,7 @@ Configure these parameters in the Cribl UI under the pack settings to control da
 
 ### Field Optimization
 
-- **Remove Intermediate Fields** (`remove_intermediate_fields`, default: `true`) - Remove temporary and duplicate fields after processing (security_event_key, config_status, operation_status, session_user, session_ip, message_type, facility_description, syslog_severity).
+- **Remove Intermediate Fields** (`remove_intermediate_fields`, default: `true`) - Remove temporary and duplicate fields after processing (message, security_event_key, config_status, operation_status, session_user, session_ip, message_type, facility_description, syslog_severity). The `message` field from Cribl's syslog parser is removed since its content is fully captured in the extracted structured fields.
 
 ### Data Handling
 
@@ -140,6 +140,11 @@ Configure these parameters in the Cribl UI under the pack settings to control da
 - **security_alert** - Boolean flag for security-relevant events
 
 ## Release Notes
+
+### 1.0.2
+
+- Remove `message` field by default across all pipelines (lossless — content is captured in extracted fields)
+- Fixes data footprint regression where events carried data three times (_raw + message + extracted fields)
 
 ### 1.0.1
 

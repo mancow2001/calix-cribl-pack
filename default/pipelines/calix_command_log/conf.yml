@@ -162,6 +162,7 @@ functions:
     disabled: false
     conf:
       remove:
+        - message
         - security_event_key
         - config_status
         - operation_status

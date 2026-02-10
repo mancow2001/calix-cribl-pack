@@ -162,6 +162,7 @@ functions:
     disabled: false
     conf:
       remove:
+        - message
         - syslog_severity
 
   - id: eval

@@ -55,6 +55,7 @@ functions:
     disabled: false
     conf:
       remove:
+        - message
         - facility_description
 
   - id: eval
