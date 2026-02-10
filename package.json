@@ -1,6 +1,6 @@
 {
   "name": "calix-axos",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "Calix AXOS Syslog",
   "description": "Comprehensive Cribl pack for Calix AXOS syslog events. Parses and enriches all AXOS syslog facilities including command logs (LOCAL6), alarm/event notifications (LOCAL7), and all category-specific facilities (SECURITY, ARC, CONFIGURATION, DBCHANGE, GENERAL, ERPS, TCA, OAM, PON, PORT, DHCP, RSTP, LAG, G8032, NTP, LACP, ENVIRONMENTAL, NTWCLK). Includes security event detection, MITRE ATT&CK mapping, and configuration change tracking.",
   "author": "Nathan Bray",
@@ -9,5 +9,49 @@
     "dataType": ["logs"],
     "useCase": ["normalization", "enrichment", "security"]
   },
-  "minVersion": "4.0.0"
+  "minVersion": "4.0.0",
+  "parameters": [
+    {
+      "name": "enable_polling_suppression",
+      "type": "boolean",
+      "label": "Suppress Polling Noise",
+      "description": "Suppress repetitive AT-OPERATION COMPLD events (automated polling). Deduplicates by user and command xpath over the suppression window.",
+      "default": false
+    },
+    {
+      "name": "suppression_window_sec",
+      "type": "number",
+      "label": "Suppression Window (seconds)",
+      "description": "Time window in seconds for polling noise deduplication. Only applies when Suppress Polling Noise is enabled.",
+      "default": 300
+    },
+    {
+      "name": "raw_handling",
+      "type": "string",
+      "label": "Raw Event Handling",
+      "description": "Control _raw field after field extraction. 'keep' preserves the original, 'truncate' keeps first 256 characters, 'remove' drops _raw entirely.",
+      "default": "keep"
+    },
+    {
+      "name": "remove_intermediate_fields",
+      "type": "boolean",
+      "label": "Remove Intermediate Fields",
+      "description": "Remove temporary and duplicate fields after processing (security_event_key, config_status, operation_status, session_user, session_ip, message_type, facility_description, syslog_severity).",
+      "default": true
+    },
+    {
+      "name": "severity_routing",
+      "type": "boolean",
+      "label": "Severity-Based Routing",
+      "description": "Route INFO and CLEAR severity alarm events to a secondary output. Suppresses alarm flapping (rapid raise/clear cycles).",
+      "default": false
+    },
+    {
+      "name": "enable_mitre_enrichment",
+      "type": "string",
+      "label": "MITRE ATT&CK Enrichment",
+      "description": "Control when MITRE ATT&CK fields are added. 'all' enriches every event, 'security_only' enriches only security-relevant events, 'off' disables MITRE enrichment.",
+      "default": "all"
+    }
+  ]
 }

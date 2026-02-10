@@ -66,6 +66,25 @@ Default pipeline for all AXOS syslog events. Extracts bracket fields [shelf][slo
 - **calix_event_definitions.csv** - Event definitions with security relevance and maskable flags (66 events)
 - **calix_security_events.csv** - MITRE ATT&CK tactic and technique mappings (17 events)
 
+## Pack Parameters
+
+Configure these parameters in the Cribl UI under the pack settings to control data optimization behavior.
+
+### Noise Reduction
+
+- **Suppress Polling Noise** (`enable_polling_suppression`, default: `false`) - Suppress repetitive AT-OPERATION COMPLD events (automated polling). Deduplicates by user and command xpath over the suppression window.
+- **Suppression Window** (`suppression_window_sec`, default: `300`) - Time window in seconds for polling noise deduplication. Only applies when Suppress Polling Noise is enabled.
+
+### Field Optimization
+
+- **Remove Intermediate Fields** (`remove_intermediate_fields`, default: `true`) - Remove temporary and duplicate fields after processing (security_event_key, config_status, operation_status, session_user, session_ip, message_type, facility_description, syslog_severity).
+
+### Data Handling
+
+- **Raw Event Handling** (`raw_handling`, default: `keep`) - Control _raw field after field extraction. `keep` preserves the original, `truncate` keeps first 256 characters, `remove` drops _raw entirely.
+- **Severity-Based Routing** (`severity_routing`, default: `false`) - Route INFO and CLEAR severity alarm events to cold storage index. Suppresses alarm flapping (rapid raise/clear cycles).
+- **MITRE ATT&CK Enrichment** (`enable_mitre_enrichment`, default: `all`) - Control when MITRE ATT&CK fields are added. `all` enriches every matching event, `security_only` enriches only security-relevant events, `off` disables MITRE enrichment.
+
 ## Extracted Fields
 
 ### Common Fields (all pipelines)
@@ -74,21 +93,19 @@ Default pipeline for all AXOS syslog events. Extracts bracket fields [shelf][slo
 - **slot_id** - Slot identifier
 - **controller_state** - Active (A) or Standby (S)
 - **process_id** - Process identifier
-- **facility_code** - Numeric facility code (16-23)
 - **axos_category** - Resolved category name
-- **facility_name** - Resolved facility name (LOCAL0-LOCAL7)
 - **appname** - Application name from syslog header
 - **sourcetype** - Cribl sourcetype
 
 ### Command Log Fields (LOCAL6)
 
 - **message_code** - Message identifier (e.g., DBCMD.DBA.1)
-- **message_type** - AT-CONFIG or AT-OPERATION
+- **message_type** - AT-CONFIG or AT-OPERATION (removed when `remove_intermediate_fields` is enabled; replaced by `action_type`)
 - **action_type** - Resolved action type
 - **status** - COMPLD (success) or DENY (denied)
-- **session_user** - User who issued the command
+- **session_user** - User who issued the command (removed when `remove_intermediate_fields` is enabled; replaced by `user`)
 - **session_manager** - Management interface (cli, netconf, ewi)
-- **session_ip** - Source IP address
+- **session_ip** - Source IP address (removed when `remove_intermediate_fields` is enabled; replaced by `src_ip`)
 - **session_id** - Session identifier
 - **config_verb** - Configuration verb (for AT-CONFIG)
 - **config_xpath** - Configuration path (for AT-CONFIG)
@@ -102,7 +119,6 @@ Default pipeline for all AXOS syslog events. Extracts bracket fields [shelf][slo
 ### Alarm/Event Fields (LOCAL7)
 
 - **alarm_id** - Alarm identifier
-- **syslog_severity** - Numeric syslog severity
 - **perceived_severity** - AXOS severity (CRITICAL, MAJOR, MINOR, WARNING, INFO, CLEAR)
 - **alarm_name** - Alarm or event name
 - **alarm_category** - Alarm category
@@ -118,13 +134,23 @@ Default pipeline for all AXOS syslog events. Extracts bracket fields [shelf][slo
 - **alarm_src_manager** - Source manager
 - **security_relevant** - Boolean flag from alarm definitions lookup
 - **maskable** - Boolean flag from event definitions lookup
-- **syslog_severity_name** - Resolved syslog severity name
 - **mitre_tactic** - MITRE ATT&CK tactic
 - **mitre_technique_id** - MITRE ATT&CK technique ID
 - **mitre_technique_name** - MITRE ATT&CK technique name
 - **security_alert** - Boolean flag for security-relevant events
 
 ## Release Notes
+
+### 1.0.1
+
+- Added configurable pack parameters for data footprint optimization
+- Polling noise suppression for AT-OPERATION COMPLD events
+- Configurable _raw handling (keep, truncate, remove)
+- Severity-based routing for alarm events
+- Conditional MITRE ATT&CK enrichment
+- Removed redundant fields (facility_code, facility_name, syslog_severity_name, axos_severity)
+- Removed no-op severity map lookup
+- Intermediate field cleanup (security_event_key, config_status, operation_status)
 
 ### 1.0.0
 

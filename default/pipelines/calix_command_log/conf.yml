@@ -20,7 +20,7 @@ functions:
       iterations: 1
       overwrite: false
       type: regex
-      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[\d+\]/
 
   - id: regex_extract
     filter: "true"
@@ -52,13 +52,11 @@ functions:
       reloadPeriodSec: 60
       addToEvent: false
       inFields:
-        - eventField: facility_code
+        - eventField: facility
           lookupField: priority
       outFields:
         - lookupField: axos_category
           eventField: axos_category
-        - lookupField: facility_name
-          eventField: facility_name
 
   - id: regex_extract
     filter: "_raw.includes('AT-CONFIG')"
@@ -120,7 +118,7 @@ functions:
           value: "(status === 'DENY') || (action_type === 'AT-CONFIG')"
 
   - id: lookup
-    filter: "true"
+    filter: "action_type === 'AT-CONFIG' && C.vars['enable_mitre_enrichment'] !== 'off'"
     disabled: false
     conf:
       file: calix_security_events.csv
@@ -140,6 +138,52 @@ functions:
           eventField: mitre_technique_name
         - lookupField: description
           eventField: event_description
+
+  - id: eval
+    filter: "C.vars['enable_mitre_enrichment'] === 'security_only' && !security_alert"
+    disabled: false
+    conf:
+      remove:
+        - mitre_tactic
+        - mitre_technique_id
+        - mitre_technique_name
+        - event_description
+
+  - id: suppress
+    filter: "C.vars['enable_polling_suppression'] && message_type=='AT-OPERATION' && status=='COMPLD'"
+    disabled: false
+    conf:
+      allow: 1
+      suppressPeriodSec: "C.vars['suppression_window_sec'] || 300"
+      keyExpr: "`${session_user}:${operation_xpath}`"
+
+  - id: eval
+    filter: "C.vars['remove_intermediate_fields'] !== false"
+    disabled: false
+    conf:
+      remove:
+        - security_event_key
+        - config_status
+        - operation_status
+        - session_user
+        - session_ip
+        - message_type
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'truncate'"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: _raw
+          value: "_raw.substring(0, 256)"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'remove'"
+    disabled: false
+    conf:
+      remove:
+        - _raw
 description: >-
   Calix AXOS command log pipeline for LOCAL6 events. Parses AT-CONFIG and
   AT-OPERATION messages extracting session user, manager, IP, session ID,

@@ -20,7 +20,7 @@ functions:
       iterations: 1
       overwrite: false
       type: regex
-      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[\d+\]/
 
   - id: regex_extract
     filter: "!appname"
@@ -42,13 +42,11 @@ functions:
       reloadPeriodSec: 60
       addToEvent: false
       inFields:
-        - eventField: facility_code
+        - eventField: facility
           lookupField: priority
       outFields:
         - lookupField: axos_category
           eventField: axos_category
-        - lookupField: facility_name
-          eventField: facility_name
 
   - id: regex_extract
     filter: "true"
@@ -58,25 +56,7 @@ functions:
       iterations: 1
       overwrite: false
       type: regex
-      regex: /Id:(?<alarm_id>\d+),\s*Syslog-Severity:(?<syslog_severity>\d+),\s*Perceived-Severity:(?<perceived_severity>\w+),\s*Name:(?<alarm_name>[\w-]+),\s*Category:(?<alarm_category>\w+)\s*Cause:(?<alarm_cause>.+?),\s*Details:(?<alarm_details>.+?),\s*Xpath:(?<alarm_xpath>.+?)\s*Address:(?<alarm_address>.+?),\s*Primary-element:(?<primary_element>.+?),\s*Value:(?<alarm_value>.+?),\s*Verb:(?<alarm_verb>.+?),\s*Session:(?<alarm_session>.+?),\s*Login:(?<alarm_login>.+?),\s*IpAddress:(?<alarm_ip>.+?),\s*SrcManager:(?<alarm_src_manager>.+?),\s*Secondary-element:(?<secondary_element>.*)/
-
-  - id: lookup
-    filter: "perceived_severity"
-    disabled: false
-    conf:
-      file: calix_severity_map.csv
-      matchMode: exact
-      matchType: first
-      reloadPeriodSec: 60
-      addToEvent: false
-      inFields:
-        - eventField: perceived_severity
-          lookupField: axos_severity_name
-      outFields:
-        - lookupField: syslog_severity_name
-          eventField: syslog_severity_name
-        - lookupField: axos_severity
-          eventField: axos_severity
+      regex: /Id:(?<alarm_id>\d+),\s*Syslog-Severity:\d+,\s*Perceived-Severity:(?<perceived_severity>\w+),\s*Name:(?<alarm_name>[\w-]+),\s*Category:(?<alarm_category>\w+)\s*Cause:(?<alarm_cause>.+?),\s*Details:(?<alarm_details>.+?),\s*Xpath:(?<alarm_xpath>.+?)\s*Address:(?<alarm_address>.+?),\s*Primary-element:(?<primary_element>.+?),\s*Value:(?<alarm_value>.+?),\s*Verb:(?<alarm_verb>.+?),\s*Session:(?<alarm_session>.+?),\s*Login:(?<alarm_login>.+?),\s*IpAddress:(?<alarm_ip>.+?),\s*SrcManager:(?<alarm_src_manager>.+?),\s*Secondary-element:(?<secondary_element>.*)/
 
   - id: lookup
     filter: "alarm_name"
@@ -111,7 +91,7 @@ functions:
           eventField: maskable
 
   - id: lookup
-    filter: "alarm_name"
+    filter: "alarm_name && C.vars['enable_mitre_enrichment'] !== 'off'"
     disabled: false
     conf:
       file: calix_security_events.csv
@@ -149,6 +129,56 @@ functions:
         - disabled: false
           name: security_alert
           value: "security_relevant === 'true' || alarm_category === 'SECURITY'"
+
+  - id: eval
+    filter: "C.vars['enable_mitre_enrichment'] === 'security_only' && !security_alert"
+    disabled: false
+    conf:
+      remove:
+        - mitre_tactic
+        - mitre_technique_id
+        - mitre_technique_name
+        - event_description
+
+  - id: suppress
+    filter: "C.vars['severity_routing'] && perceived_severity === 'CLEAR'"
+    disabled: false
+    conf:
+      allow: 1
+      suppressPeriodSec: 300
+      keyExpr: "`${alarm_name}:${alarm_address}`"
+
+  - id: eval
+    filter: "C.vars['severity_routing'] && (perceived_severity === 'INFO' || perceived_severity === 'CLEAR')"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: index
+          value: "'cold_storage'"
+
+  - id: eval
+    filter: "C.vars['remove_intermediate_fields'] !== false"
+    disabled: false
+    conf:
+      remove:
+        - syslog_severity
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'truncate'"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: _raw
+          value: "_raw.substring(0, 256)"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'remove'"
+    disabled: false
+    conf:
+      remove:
+        - _raw
 description: >-
   Calix AXOS alarm pipeline for LOCAL7 events. Parses alarm notification
   fields including Id, Severity, Name, Category, Cause, Details, Xpath,

@@ -19,7 +19,7 @@ functions:
       iterations: 1
       overwrite: false
       type: regex
-      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[\d+\]/
 
   - id: regex_extract
     filter: "true"
@@ -51,13 +51,11 @@ functions:
       reloadPeriodSec: 60
       addToEvent: false
       inFields:
-        - eventField: facility_code
+        - eventField: facility
           lookupField: priority
       outFields:
         - lookupField: axos_category
           eventField: axos_category
-        - lookupField: facility_name
-          eventField: facility_name
 
   - id: eval
     filter: "true"
@@ -76,6 +74,22 @@ functions:
         - disabled: false
           name: index
           value: "axos_category === 'SECURITY' ? 'security' : 'network'"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'truncate'"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: _raw
+          value: "_raw.substring(0, 256)"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'remove'"
+    disabled: false
+    conf:
+      remove:
+        - _raw
 description: >-
   Calix AXOS main entry pipeline. Parses AXOS bracket fields (shelf, slot,
   controller state, process ID, facility code), extracts message code and type,

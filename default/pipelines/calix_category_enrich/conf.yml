@@ -20,7 +20,7 @@ functions:
       iterations: 1
       overwrite: false
       type: regex
-      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[(?<facility_code>\d+)\]/
+      regex: /\[(?<shelf_id>\d+)\]\[(?<slot_id>\d+)\]\[(?<controller_state>[AS])\]\[(?<process_id>\d+)\]\s+\[\d+\]/
 
   - id: regex_extract
     filter: "true"
@@ -42,15 +42,20 @@ functions:
       reloadPeriodSec: 60
       addToEvent: false
       inFields:
-        - eventField: facility_code
+        - eventField: facility
           lookupField: priority
       outFields:
         - lookupField: axos_category
           eventField: axos_category
-        - lookupField: facility_name
-          eventField: facility_name
         - lookupField: description
           eventField: facility_description
+
+  - id: eval
+    filter: "C.vars['remove_intermediate_fields'] !== false"
+    disabled: false
+    conf:
+      remove:
+        - facility_description
 
   - id: eval
     filter: "true"
@@ -69,6 +74,22 @@ functions:
         - disabled: false
           name: security_alert
           value: "axos_category === 'SECURITY'"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'truncate'"
+    disabled: false
+    conf:
+      add:
+        - disabled: false
+          name: _raw
+          value: "_raw.substring(0, 256)"
+
+  - id: eval
+    filter: "C.vars['raw_handling'] === 'remove'"
+    disabled: false
+    conf:
+      remove:
+        - _raw
 description: >-
   Calix AXOS category enrichment pipeline for LOCAL0-LOCAL5 facilities.
   Extracts bracket fields and message code, enriches with facility category
