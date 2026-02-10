@@ -1,0 +1,8 @@
+# Build output
+*.crbl
+
+# macOS
+.DS_Store
+
+# Reference materials (PDFs, reference packs)
+reference/

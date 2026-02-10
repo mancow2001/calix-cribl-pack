@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Update package.json version
+        run: |
+          sed -i 's/"version": *"[^"]*"/"version": "'"${{ steps.version.outputs.VERSION }}"'"/' package.json
+          echo "Updated package.json to version ${{ steps.version.outputs.VERSION }}:"
+          cat package.json
+
+      - name: Build .crbl package
+        run: |
+          tar -czf calix-axos-${{ steps.version.outputs.VERSION }}.crbl \
+            --exclude='.DS_Store' \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='reference' \
+            --exclude='*.crbl' \
+            .
+          echo "Built package:"
+          ls -lh calix-axos-${{ steps.version.outputs.VERSION }}.crbl
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            calix-axos-${{ steps.version.outputs.VERSION }}.crbl \
+            --title "Calix AXOS Syslog Pack $GITHUB_REF_NAME" \
+            --generate-notes
