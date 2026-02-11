@@ -141,27 +141,17 @@ Configure these parameters in the Cribl UI under the pack settings to control da
 
 ## Release Notes
 
-### 1.0.2
+### 1.0.3
 
-- Remove `message` field by default across all pipelines (lossless — content is captured in extracted fields)
-- Fixes data footprint regression where events carried data three times (_raw + message + extracted fields)
-
-### 1.0.1
-
-- Added configurable pack parameters for data footprint optimization
+- Parsing for all AXOS syslog facilities (LOCAL0-LOCAL7)
+- Command log parsing (AT-CONFIG and AT-OPERATION)
+- Alarm/event notification parsing with 17-field extraction
+- Facility, alarm, event, and security event lookups
+- MITRE ATT&CK enrichment for security-relevant events
+- Configurable pack parameters for data footprint optimization
 - Polling noise suppression for AT-OPERATION COMPLD events
 - Configurable _raw handling (keep, truncate, remove)
 - Severity-based routing for alarm events
 - Conditional MITRE ATT&CK enrichment
-- Removed redundant fields (facility_code, facility_name, syslog_severity_name, axos_severity)
-- Removed no-op severity map lookup
+- Automatic removal of redundant fields (message, facility_code, facility_name, syslog_severity_name, axos_severity)
 - Intermediate field cleanup (security_event_key, config_status, operation_status)
-
-### 1.0.0
-
-- Initial release
-- Parsing for all AXOS syslog facilities (LOCAL0-LOCAL7)
-- Command log parsing (AT-CONFIG and AT-OPERATION)
-- Alarm/event notification parsing with 17-field extraction
-- Facility, severity, alarm, event, and security event lookups
-- MITRE ATT&CK enrichment for security-relevant events
